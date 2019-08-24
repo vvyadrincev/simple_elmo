@@ -63,7 +63,7 @@ def weight_layers(name, bilm_ops, l2_coef=0.0,
             # no regularization
             reg = 0.0
         else:
-            elmo_weights = tf.compat.v1.get_variable(
+            elmo_weights = tf.get_variable(
                 '{}_ELMo_W'.format(name),
                 shape=(n_lm_layers,),
                 initializer=tf.zeros_initializer,
@@ -82,9 +82,9 @@ def weight_layers(name, bilm_ops, l2_coef=0.0,
             pieces = []
             for w, t in zip(normed_weights, layers):
                 if do_layer_norm:
-                    pieces.append(w * _do_ln(tf.squeeze(t, squeeze_dims=1)))
+                    pieces.append(w * _do_ln(tf.squeeze(t, axis=1)))
                 else:
-                    pieces.append(w * tf.squeeze(t, squeeze_dims=1))
+                    pieces.append(w * tf.squeeze(t, axis=1))
             sum_pieces = tf.add_n(pieces)
 
             # get the regularizer 
