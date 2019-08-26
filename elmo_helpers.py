@@ -7,6 +7,7 @@ import os
 import tensorflow as tf
 from bilm import Batcher, BidirectionalLanguageModel, weight_layers
 
+
 def tokenize(string):
     """
     :param string: well, text string
