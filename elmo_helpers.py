@@ -25,7 +25,7 @@ def get_elmo_vectors(sess, texts, batcher, sentence_character_ids, elmo_sentence
     :param batcher: ELMo batcher object
     :param sentence_character_ids: ELMo character id placeholders
     :param elmo_sentence_input: ELMo op object
-    :return: list of vector matrices for all sentences (max word count by vector size)
+    :return: embedding matrix for all sentences (max word count by vector size)
     """
 
     # Create batches of data.
