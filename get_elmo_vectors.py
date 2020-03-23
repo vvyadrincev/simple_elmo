@@ -1,10 +1,17 @@
+#!/usr/bin/python3
+
 # python3
 # coding: utf-8
 
 import argparse
-from elmo_helpers import *
+from elmo_helpers import load_elmo_embeddings, get_elmo_vectors, tf, tokenize
 from smart_open import open
 import numpy as np
+
+# import os
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -15,28 +22,30 @@ if __name__ == '__main__':
     args = parser.parse_args()
     data_path = args.input
 
-    raw_sentences = []
+data_path = '../data/senses_N_names.txt'
+raw_sentences = []
+with open(data_path, 'r') as f:
+    for line in f:
+        res = line.strip()
+        raw_sentences.append(res)
+sentences = [tokenize(s) for s in raw_sentences]
+print('=====')
+print('%d sentences total' % len(sentences))
+print('=====')
 
-    with open(data_path, 'r') as f:
-        for line in f:
-            res = line.strip()
-            raw_sentences.append(res)
-    sentences = [tokenize(s) for s in raw_sentences]
+# Loading a pre-trained ELMo model:
+# You can call load_elmo_embeddings() with top=True to use only the top ELMo layer
+#batcher, sentence_character_ids, elmo_sentence_input = load_elmo_embeddings(args.elmo)
+batcher, sentence_character_ids, elmo_sentence_input = load_elmo_embeddings('../data/rusvectores_models/196')
 
-    print('=====')
-    print('%d sentences total' % len(sentences))
-    print('=====')
 
-    # Loading a pre-trained ELMo model:
-    # You can call load_elmo_embeddings() with top=True to use only the top ELMo layer
-    batcher, sentence_character_ids, elmo_sentence_input = load_elmo_embeddings(args.elmo)
-
-    # Actually producing ELMo embeddings for our data:
-    with tf.Session() as sess:
-        # It is necessary to initialize variables once before running inference.
-        sess.run(tf.global_variables_initializer())
-        elmo_vectors = get_elmo_vectors(
-            sess, sentences, batcher, sentence_character_ids, elmo_sentence_input)
+batch_size=300
+# Actually producing ELMo embeddings for our data:
+with tf.Session() as sess:
+    # It is necessary to initialize variables once before running inference.
+    sess.run(tf.global_variables_initializer())
+    elmo_vectors = get_elmo_vectors(
+        sess, sentences[:batch_size], batcher, sentence_character_ids, elmo_sentence_input)
 
     print('ELMo embeddings for your input are ready')
     print('Tensor shape:', elmo_vectors.shape)
@@ -53,7 +62,7 @@ if __name__ == '__main__':
 
     # A quick test:
     # in each sentence, we find the tokens most similar to the 2nd token of the first sentence
-    query_nr = 2
+    query_nr = 1
     query_word = sentences[0][query_nr]
     print('Query sentence:', sentences[0])
     print('Query:', query_word)
